@@ -4,7 +4,6 @@ import baritone.api.BaritoneAPI;
 import com.minetree.MineTreeException;
 import net.minecraft.text.Text;
 
-import java.awt.*;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -12,7 +11,7 @@ public abstract class MineTreeTask {
 
     private final List<Step> steps;
     private int index = 0;
-    private Consumer<Text> prevLoggerValue;
+    private final Consumer<Text> prevLoggerValue;
 
     protected MineTreeTask(List<Step> steps) {
         this.steps = steps;
@@ -22,9 +21,18 @@ public abstract class MineTreeTask {
         };
     }
 
+    public void cancel() {
+        cleanup();
+        steps.clear();
+    }
+
+    private void cleanup() {
+        BaritoneAPI.getSettings().logger.value = prevLoggerValue;
+    }
+
     public final boolean tick() throws MineTreeException {
         if (index >= steps.size()) {
-            BaritoneAPI.getSettings().logger.value = prevLoggerValue;
+            cleanup();
             return true;
         }
         Step current = steps.get(index);
@@ -32,7 +40,7 @@ public abstract class MineTreeTask {
         while (result == StepResult.DONE) {
             index++;
             if (index >= steps.size()) {
-                BaritoneAPI.getSettings().logger.value = prevLoggerValue;
+                cleanup();
                 return true;
             }
             current = steps.get(index);

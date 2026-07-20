@@ -44,6 +44,7 @@ public final class TaskRunner {
         if (active != null) {
             info("Cancelled.");
             BaritoneUtil.cancelEverything();
+            active.cancel();
             active = null;
         }
     }
